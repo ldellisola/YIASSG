@@ -17,13 +17,6 @@ namespace MDParser
             DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest));
 
 
-            //p.ConvertDocument(dest + "\\README.md");
-
-
-
-            //var p = new Pandoc();
-
-
             DirectoryStructure.RunInEveryDirectory(async t =>
             {
                 await new Pandoc().ConvertDocument(t);
