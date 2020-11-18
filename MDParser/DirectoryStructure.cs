@@ -54,13 +54,13 @@ namespace MDParser
             }
         }
 
-        public static string CreateIndex(List<FileInfo> mdFiles,string title)
+        public  static string CreateIndex(List<FileInfo> mdFiles,string title)
         {
             List<TitleNode> fileTrees = new List<TitleNode>();
 
             foreach (var file in mdFiles)
             {
-                var lines = File.ReadAllLines(file.FullName)
+                var lines = ( File.ReadAllLines(file.FullName))
                     .Where(t =>
                     {
                         var reg = Regex.Match(t, "^(#+).+$");
@@ -142,7 +142,7 @@ namespace MDParser
 
         }
 
-        public static void RunInAllFiles(Action<string> convert, string dir,string searchPattern = "*.md" )
+        public static  void RunInAllFiles(Action<string> convert, string dir,string searchPattern = "*.md" )
         {
 
             var files = Directory.GetFiles(dir,searchPattern);
@@ -151,16 +151,19 @@ namespace MDParser
             for(int i = 0; i < files.Length; i++)
             {
                 var i1 = i;
-                convert(files[i1]);
-                //tasks[i] = (Task.Factory.StartNew(() => { convert(files[i1]); return files[i1];
-                //}).ContinueWith(t=>Console.WriteLine(t.Result)));
+                //convert(files[i1]);
+                tasks[i] = (Task.Factory.StartNew(() =>
+                {
+                    convert(files[i1]); return files[i1];
+                }).ContinueWith(t => Console.WriteLine(t.Result)));
             }
 
             var directories = Directory.GetDirectories(dir).ToList();
 
-            //Task.WaitAll(tasks);
 
-            directories.ForEach((t) =>
+            Task.WaitAll(tasks);
+
+            directories.ForEach(async t =>
             {
                 RunInAllFiles(convert,t);
             });

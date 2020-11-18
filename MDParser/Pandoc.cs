@@ -30,16 +30,18 @@ namespace MDParser
             dic[@"\\sub"] = Tuple.Create(@"\subset", ReplacementType.Prefix);
             dic[@"\\empty"] = Tuple.Create(@"\emptyset",ReplacementType.Prefix);
 
+            //\subsete ?? In Teoria axiomatica logica.
+
             css = File.ReadAllText(cssPath);
         }
 
-        public void ProcessDocument(string path)
+        public async Task ProcessDocument(string path)
         {
             FileInfo file = new FileInfo(path);
 
             string src = file.FullName;
 
-            var fs = File.ReadAllText(src);
+            var fs = await File.ReadAllTextAsync(src);
             int offset = 0;
 
             foreach (var pair in dic)
@@ -94,8 +96,6 @@ namespace MDParser
                     }
                     
                 }
-
-                File.WriteAllText(src,fs);
             }
 
 
@@ -106,7 +106,7 @@ namespace MDParser
                 string address = match.Groups[2].Value;
                 string hashtag = match.Groups[3].Value;
 
-                var reg = new Regex(@"[^a-zA-Z0-9 -\u00C0-\u00FF]");
+                var reg = new Regex(@"[^a-zA-Z0-9\u00C0-\u00FF -_]");
                 string titleLink = reg.Replace(match.Groups[4].Value,"").
                     Replace(' ','-').ToLowerInvariant();
 
@@ -147,7 +147,7 @@ namespace MDParser
 
             } while (baseIndex < fs.Length && baseIndex >= 0);
 
-            File.WriteAllText(src,fs);
+            await File.WriteAllTextAsync(src,fs);
         }
 
 
@@ -177,17 +177,17 @@ namespace MDParser
 
             CMD.Start();
 
-            CMD.WaitForExit();
+            await CMD.WaitForExitAsync();
 
-            string err = CMD.StandardError.ReadToEnd();
+            string err = await CMD.StandardError.ReadToEndAsync();
 
             Debug.WriteLineIf(err != "", err);
 
-            var html = File.ReadAllText(dest);
+            var html = await File.ReadAllTextAsync(dest);
 
             var insert = html.Insert(html.IndexOf("</head>", StringComparison.Ordinal), css);
 
-            File.WriteAllText(dest,insert);
+            await File.WriteAllTextAsync(dest,insert);
 
             File.Delete(path);
 
