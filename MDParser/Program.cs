@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -19,10 +20,6 @@ namespace MDParser
 
 
 
-            new Pandoc().ProcessDocument(@"C:\Users\luckd\Desktop\test.md");
-            new Pandoc().ConvertDocument(@"C:\Users\luckd\Desktop\test.md").Wait();
-
-
             // Copy
 
             DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest),true);
@@ -31,6 +28,8 @@ namespace MDParser
             // Process
 
                 // This function will create the indexes of courses
+                
+            List<Metadata> coursesMedatada = new List<Metadata>();
 
             DirectoryStructure.RunInEveryDirectory(t =>
             {
@@ -39,9 +38,7 @@ namespace MDParser
                     return;
 
                 Metadata metadata = JsonSerializer.Deserialize<Metadata>(metadataFiles.First().OpenText().ReadToEnd());
-
-
-
+                coursesMedatada.Add(metadata);
                 var mdFiles = t.GetFiles("*.md").ToList();
                 if (mdFiles.Count != 0)
                 {
@@ -50,6 +47,8 @@ namespace MDParser
                 }
 
             },dest);
+
+            new Pandoc().CreateIndex(coursesMedatada,dest);
                     
 
                 // This function will process all the documents to translate latex and convert links

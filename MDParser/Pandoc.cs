@@ -29,10 +29,6 @@ namespace MDParser
             dic[@"\\C"] = Tuple.Create(@"\mathbb{C}",ReplacementType.None);
             dic[@"\\sub"] = Tuple.Create(@"\subset", ReplacementType.Prefix);
             dic[@"\\empty"] = Tuple.Create(@"\emptyset",ReplacementType.Prefix);
-            /*
-             * overli
-             * emptyset
-             */
 
             css = File.ReadAllText(cssPath);
         }
@@ -44,11 +40,12 @@ namespace MDParser
             string src = file.FullName;
 
             var fs = File.ReadAllText(src);
+            int offset = 0;
 
             foreach (var pair in dic)
             {
                 var matches = Regex.Matches(fs,pair.Key);
-                int offset = 0;
+                offset = 0;
                 foreach (var match in matches.ToList())
                 {
 
@@ -101,7 +98,33 @@ namespace MDParser
                 File.WriteAllText(src,fs);
             }
 
-            fs = fs.Replace(".md", ".html");
+
+            offset = 0;
+            foreach (var match in Regex.Matches(fs, @"\[(.+)\]\((.*)\.md(#*)(.*)\)").ToList())
+            {
+                string text = match.Groups[1].Value;
+                string address = match.Groups[2].Value;
+                string hashtag = match.Groups[3].Value;
+
+                var reg = new Regex(@"[^a-zA-Z0-9 -\u00C0-\u00FF]");
+                string titleLink = reg.Replace(match.Groups[4].Value,"").
+                    Replace(' ','-').ToLowerInvariant();
+
+                fs = fs.Remove(match.Index + offset,match.Length);
+
+                if (hashtag.Length == 0)
+                {
+                    fs = fs.Insert(match.Index + offset, $"[{text}]({address}.html)");
+                    offset += $"[{text}]({address}.html)".Length - match.Length;
+                }
+                else
+                {
+                    fs = fs.Insert(match.Index + offset, $"[{text}]({address}.html#{titleLink})");
+                    offset +=$"[{text}]({address}.html#{titleLink})".Length - match.Length;
+                }
+            }
+
+
 
             int baseIndex = 0;
 
@@ -175,6 +198,20 @@ namespace MDParser
             Suffix,
             Prefix,
             None
+        }
+
+        public void CreateIndex(List<Metadata> coursesMedatada, string dest)
+        {
+            StringBuilder bld = new StringBuilder();
+
+            bld.AppendLine($"# Materias");
+
+            coursesMedatada.ForEach(t =>
+            {
+                bld.AppendLine($"- [{t.CourseCode} - {t.CourseName}]({t.CourseCode}/index.md)");
+            });
+
+            File.WriteAllText(dest + @"/index.md",bld.ToString());
         }
     }
 
