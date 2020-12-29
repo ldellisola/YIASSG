@@ -29,6 +29,10 @@ namespace MDParser
             dic[@"\\C"] = Tuple.Create(@"\mathbb{C}",ReplacementType.None);
             dic[@"\\sub"] = Tuple.Create(@"\subset", ReplacementType.Prefix);
             dic[@"\\empty"] = Tuple.Create(@"\emptyset",ReplacementType.Prefix);
+            dic[@"\\rarr"] = Tuple.Create(@"\rightarrow", ReplacementType.None);
+            dic[@"\\Rarr"] = Tuple.Create(@"\Rightarrow", ReplacementType.None);
+            dic[@"\\larr"] = Tuple.Create(@"\leftarrow", ReplacementType.None);
+            dic[@"\\Larr"] = Tuple.Create(@"\Leftarrow", ReplacementType.None);
 
             //\subsete ?? In Teoria axiomatica logica.
 
@@ -184,9 +188,9 @@ namespace MDParser
             Debug.WriteLineIf(err != "", err);
 
             var html = await File.ReadAllTextAsync(dest);
-
+            
             var insert = html.Insert(html.IndexOf("</head>", StringComparison.Ordinal), css);
-
+            
             await File.WriteAllTextAsync(dest,insert);
 
             File.Delete(path);

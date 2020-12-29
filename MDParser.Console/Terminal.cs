@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using CommandLine;
 
 namespace MDParser.Console
@@ -11,11 +12,12 @@ namespace MDParser.Console
     public class Terminal
     {
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CommandLine.Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(RunOptions)
-                .WithNotParsed(ParseError);
+            await CommandLine.Parser.Default.ParseArguments<Options>(args)
+                .WithNotParsed(ParseError)
+                .WithParsedAsync(RunOptionsAsync);
+
         }
 
         public class Options
@@ -27,11 +29,12 @@ namespace MDParser.Console
             public string Destination { get; set; }
         }
 
-        public static void RunOptions(Options opts)
+        public static async Task RunOptionsAsync(Options opts)
         {
             string dest = opts.Destination;
             string src = opts.Source;
-
+            
+            Directory.Delete(dest,true);
             DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest),true);
 
             // Process
@@ -58,10 +61,10 @@ namespace MDParser.Console
             },dest);
 
             new Pandoc().CreateIndex(coursesMedatada,dest);
-                    
+
 
             // This function will process all the documents to translate latex and convert links
-            DirectoryStructure.RunInAllFiles( async t =>
+            await DirectoryStructure.RunInAllFiles(async t =>
             {
                 await new Pandoc().ProcessDocument(t);
             }, dest);
@@ -69,7 +72,7 @@ namespace MDParser.Console
 
 
             // Export
-            DirectoryStructure.RunInAllFiles(async t =>
+            await DirectoryStructure.RunInAllFiles(async t =>
             {
                 await new Pandoc().ConvertDocument(t);
             }, dest);

@@ -14,6 +14,7 @@ namespace MDParser
     public static class DirectoryStructure
     {
         private static string[] excludedExtensions = {".avi"};
+        private static string[] excludedFolders = {"docs"};
         public static void Copy(DirectoryInfo src, DirectoryInfo dest,bool isRoot, bool overwriteFiles = true)
         {
             if (src.Exists)
@@ -42,7 +43,7 @@ namespace MDParser
                 });
 
 
-                var directories = src.GetDirectories().Where(t => !t.Attributes.HasFlag(FileAttributes.Hidden)).ToList();
+                var directories = src.GetDirectories().Where(t => !excludedFolders.Contains(t.Name) && !t.Attributes.HasFlag(FileAttributes.Hidden)).ToList();
 
                 directories.ForEach(t =>
                 {
@@ -142,7 +143,7 @@ namespace MDParser
 
         }
 
-        public static  void RunInAllFiles(Action<string> convert, string dir,string searchPattern = "*.md" )
+        public static async Task RunInAllFiles(Func<string, Task> convert, string dir,string searchPattern = "*.md" )
         {
 
             var files = Directory.GetFiles(dir,searchPattern);
@@ -152,21 +153,24 @@ namespace MDParser
             {
                 var i1 = i;
                 //convert(files[i1]);
-                tasks[i] = (Task.Factory.StartNew(() =>
-                {
-                    convert(files[i1]); return files[i1];
-                }).ContinueWith(t => Console.WriteLine(t.Result)));
+                tasks[i] = convert(files[i1]); 
+                //tasks[i] = (Task.Factory.StartNew(() =>
+                //{
+                //    convert(files[i1]); 
+                //}));
             }
-
+            
+            await Task.WhenAll(tasks);
             var directories = Directory.GetDirectories(dir).ToList();
 
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(directories.Select(item => RunInAllFiles(convert, item)));
 
-            directories.ForEach(async t =>
-            {
-                RunInAllFiles(convert,t);
-            });
+            //foreach (var directory in directories)
+            //{
+            //    await RunInAllFiles(convert,directory);    
+            //}
+
 
         }
     }
