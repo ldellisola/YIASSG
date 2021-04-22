@@ -147,6 +147,8 @@ namespace MDParser
         {
 
             var files = Directory.GetFiles(dir,searchPattern);
+            
+            
             Task[]tasks = new Task[files.Length];
 
             for(int i = 0; i < files.Length; i++)

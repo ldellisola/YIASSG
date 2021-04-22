@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LibGit2Sharp;
@@ -18,6 +21,8 @@ namespace MDParser.Service
         private readonly string projectURL;
         private readonly string name;
         private readonly string email;
+        private readonly string branch;
+        private readonly int minuteInterval;
         private readonly CredentialsHandler credentialsProvider;
 
         public Worker(ILogger<Worker> logger, IConfiguration config)
@@ -34,6 +39,8 @@ namespace MDParser.Service
             projectURL = _config["RepositoryURL"];
             name = _config["Credentials:Name"];
             email = _config["Credentials:Email"];
+            branch = _config["branch"];
+            minuteInterval = int.Parse(_config["pullInterval"]);
         }
 
 
@@ -49,6 +56,7 @@ namespace MDParser.Service
 
                 if (!folderExists)
                 {
+                    _logger.LogInformation("Repository is not here. Clonning from github");
                     var cloneOptions = new CloneOptions
                     {
                         CredentialsProvider = credentialsProvider
@@ -59,7 +67,7 @@ namespace MDParser.Service
 
                 try
                 {
-                    var gitRepo = new Repository(projectDirectory);
+                    var repository = new Repository(projectDirectory);
 
                     // Pull Latest update
                     var pullOptions = new PullOptions
@@ -71,27 +79,88 @@ namespace MDParser.Service
                     };
 
                     var signature = new Signature(new Identity(name, email), DateTimeOffset.Now);
-                    var mergeResult = Commands.Pull(gitRepo, signature, pullOptions);
-
-                    if (mergeResult.Status != MergeStatus.UpToDate || !folderExists)
+                    var mergeResult = Commands.Pull(repository, signature, pullOptions);
+                    
+                    _logger.LogInformation($"Pulling files from repository. Current status: {mergeResult.Status.ToString()}");
+                    bool isDebug = false;
+//#if DEBUG
+//                    isDebug = true;
+//#endif
+                    if (mergeResult.Status != MergeStatus.UpToDate || !folderExists|| isDebug)
                     {
+                        string src = projectDirectory;
+                        string dest = $"{projectDirectory}docs";
+                        var pandocDictionary = Pandoc.GetDictionary();
 
+                        _logger.LogInformation($"Converting files from {src} to {dest}");
                         // Convert Markdown
+                        
+                        Directory.Delete(dest,true);
+                        DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest),true);
 
+                        _logger.LogInformation("Directory structure copied");
+                        // Process
+
+                        // This function will create the indexes of courses
+                
+                        List<Metadata> coursesMedatada = new List<Metadata>();
+
+                        DirectoryStructure.RunInEveryDirectory(t =>
+                        {
+                            var metadataFiles = t.GetFiles( ".courseMetadata");
+                            if(metadataFiles.Length != 1)
+                                return;
+
+                            Metadata metadata = JsonSerializer.Deserialize<Metadata>(metadataFiles.First().OpenText().ReadToEnd());
+                            coursesMedatada.Add(metadata);
+                            var mdFiles = t.GetFiles("*.md").ToList();
+                            if (mdFiles.Count != 0)
+                            {
+                                string indexFile = DirectoryStructure.CreateIndex(mdFiles, metadata.CourseName);
+                                File.WriteAllText(t.FullName + @"/index.md",indexFile);
+                            }
+
+                        },dest);
+                        
+                        
+
+                        new Pandoc(pandocDictionary,null).CreateIndex(coursesMedatada,dest);
+                        
+                        _logger.LogInformation("Metadata adquired and index created");
+
+                        // This function will process all the documents to translate latex and convert links
+                        await DirectoryStructure.RunInAllFiles(async t =>
+                        {
+                            await new Pandoc(pandocDictionary,null).ProcessDocument(t);
+                        }, dest);
+
+                        _logger.LogInformation("Files processed");
+
+                        // Export
+                        await DirectoryStructure.RunInAllFiles(async t =>
+                        {
+                            await new Pandoc(pandocDictionary,null).ConvertDocument(t);
+                        }, dest);
+
+                        _logger.LogInformation("Files converted to HTML");
 
                         // Add new Files
 
-                        Commands.Stage(gitRepo, "*");
+                        Commands.Stage(repository, "*");
 
 
                         // Commit changes
 
-                        var commit = gitRepo.Commit("Automatically converted Markdown files", signature, signature);
+                        var commit = repository.Commit("Automatically converted Markdown files", signature, signature);
 
+                        _logger.LogInformation("Files Commited");
+                        
                         // Push changes
 
                         var pushOptions = new PushOptions {CredentialsProvider = credentialsProvider};
-                        gitRepo.Network.Push(gitRepo.Branches["main"], pushOptions);
+                        repository.Network.Push(repository.Branches[branch], pushOptions);
+                        
+                        _logger.LogInformation($"Files pushed to {branch}");
 
                     }
 
@@ -99,16 +168,11 @@ namespace MDParser.Service
                 catch (Exception e)
                 {
                     _logger.LogWarning(e,"No files to commit. Possible error converting files");
-                    throw e;
                 }
 
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(1000 * 60 * minuteInterval, stoppingToken);
             }
         }
     }
 
-    public class Storage
-    {
-        public DateTimeOffset LastUpdate = DateTimeOffset.UnixEpoch;
-    }
 }

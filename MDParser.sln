@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MDParser", "MDParser\MDPars
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MDParser.Console", "MDParser.Console\MDParser.Console.csproj", "{E57AA0B9-FA04-478A-959B-BA68D3C819D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDParser.Service", "MDParser.Service\MDParser.Service.csproj", "{6DA3F2E1-4DA4-4F17-8D47-5A56E8E8573C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MDParser.Service", "MDParser.Service\MDParser.Service.csproj", "{6DA3F2E1-4DA4-4F17-8D47-5A56E8E8573C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -36,6 +36,7 @@ namespace MDParser.Console
             
             Directory.Delete(dest,true);
             DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest),true);
+            var pandocDictionary = Pandoc.GetDictionary();
 
             // Process
 
@@ -60,13 +61,13 @@ namespace MDParser.Console
 
             },dest);
 
-            new Pandoc().CreateIndex(coursesMedatada,dest);
+            new Pandoc(pandocDictionary,null).CreateIndex(coursesMedatada,dest);
 
 
             // This function will process all the documents to translate latex and convert links
             await DirectoryStructure.RunInAllFiles(async t =>
             {
-                await new Pandoc().ProcessDocument(t);
+                await new Pandoc(pandocDictionary,null).ProcessDocument(t);
             }, dest);
 
 
@@ -74,7 +75,7 @@ namespace MDParser.Console
             // Export
             await DirectoryStructure.RunInAllFiles(async t =>
             {
-                await new Pandoc().ConvertDocument(t);
+                await new Pandoc(pandocDictionary,null).ConvertDocument(t);
             }, dest);
         }
 

@@ -4,8 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MDParser.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace MDParser
 {
@@ -14,29 +17,37 @@ namespace MDParser
     {
         private string css { get; set; }
 
-        private const string args = "/C Pandoc \"{0}\" -s -c https://raw.githubusercontent.com/slashfoo/lmweb/master/style/latinmodern-mono-light.css --mathjax --highlight-style tango --metadata pagetitle=\"{1}\" -o \"{2}\"";
         private const string cssPath = "style.css";
-        private Dictionary<string, Tuple<string, ReplacementType>> dic = new Dictionary<string, Tuple<string, ReplacementType>>();
-        public Pandoc()
+        static string dictionaryPath = "Dictionary.json";
+        private readonly ILogger<Pandoc> _logger;
+        private Dictionary<string, Tuple<string, ReplacementType>> dic;
+        public Pandoc(Dictionary<string, Tuple<string, ReplacementType>> dictionary, ILogger<Pandoc> _logger)
         {
-            dic[@"\\and"] = Tuple.Create(@"\land", ReplacementType.Suffix );
-            dic[@"\\or"] = Tuple.Create(@"\lor",ReplacementType.Suffix);
-            dic[@"\\exist"] = Tuple.Create(@"\exists", ReplacementType.Prefix);
-            dic[@"\\N"] = Tuple.Create(@"\mathbb{N}",ReplacementType.None);
-            dic[@"\\Q"] = Tuple.Create(@"\mathbb{Q}",ReplacementType.None);
-            dic[@"\\R"] = Tuple.Create(@"\mathbb{R}",ReplacementType.None);
-            dic[@"\\Z"] = Tuple.Create(@"\mathbb{Z}",ReplacementType.None);
-            dic[@"\\C"] = Tuple.Create(@"\mathbb{C}",ReplacementType.None);
-            dic[@"\\sub"] = Tuple.Create(@"\subset", ReplacementType.Prefix);
-            dic[@"\\empty"] = Tuple.Create(@"\emptyset",ReplacementType.Prefix);
-            dic[@"\\rarr"] = Tuple.Create(@"\rightarrow", ReplacementType.None);
-            dic[@"\\Rarr"] = Tuple.Create(@"\Rightarrow", ReplacementType.None);
-            dic[@"\\larr"] = Tuple.Create(@"\leftarrow", ReplacementType.None);
-            dic[@"\\Larr"] = Tuple.Create(@"\Leftarrow", ReplacementType.None);
-
-            //\subsete ?? In Teoria axiomatica logica.
-
+            //dic[@"\\and"] = Tuple.Create(@"\land", ReplacementType.Suffix );
+            //dic[@"\\or"] = Tuple.Create(@"\lor",ReplacementType.Suffix);
+            //dic[@"\\exist"] = Tuple.Create(@"\exists", ReplacementType.Prefix);
+            //dic[@"\\N"] = Tuple.Create(@"\mathbb{N}",ReplacementType.None);
+            //dic[@"\\Q"] = Tuple.Create(@"\mathbb{Q}",ReplacementType.None);
+            //dic[@"\\R"] = Tuple.Create(@"\mathbb{R}",ReplacementType.None);
+            //dic[@"\\Z"] = Tuple.Create(@"\mathbb{Z}",ReplacementType.None);
+            //dic[@"\\C"] = Tuple.Create(@"\mathbb{C}",ReplacementType.None);
+            //dic[@"\\sub"] = Tuple.Create(@"\subset", ReplacementType.Prefix);
+            //dic[@"\\empty"] = Tuple.Create(@"\emptyset",ReplacementType.Prefix);
+            //dic[@"\\rarr"] = Tuple.Create(@"\rightarrow", ReplacementType.None);
+            //dic[@"\\Rarr"] = Tuple.Create(@"\Rightarrow", ReplacementType.None);
+            //dic[@"\\larr"] = Tuple.Create(@"\leftarrow", ReplacementType.None);
+            //dic[@"\\Larr"] = Tuple.Create(@"\Leftarrow", ReplacementType.None);
+            this._logger = _logger;
+            dic = dictionary;
             css = File.ReadAllText(cssPath);
+        }
+
+        public static Dictionary<string, Tuple<string, ReplacementType>> GetDictionary()
+        {
+            string text = File.ReadAllText(dictionaryPath);
+            
+            var a = JsonSerializer.Deserialize<Dictionary<string, Tuple<string, ReplacementType>>>(text);
+            return a;
         }
 
         public async Task ProcessDocument(string path)
@@ -162,42 +173,25 @@ namespace MDParser
             string src = file.FullName;
             string dest = file.FullName.Replace(".md", ".html");
 
-            
-            var argsComplete = String.Format(args,src, file.Name.Replace(".md",""), dest);
+            var process = new PandocProcess(src, dest, file.Name.Replace(".md", ""));
 
-            var CMD = new Process
+            await process.Execute();
+
+            if (!await process.HasError())
             {
-                StartInfo =
-                {
-                    FileName = "CMD.exe",
-                    Arguments = argsComplete,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                }
-            };
-
-            CMD.Start();
-
-            await CMD.WaitForExitAsync();
-
-            string err = await CMD.StandardError.ReadToEndAsync();
-
-            Debug.WriteLineIf(err != "", err);
-
-            var html = await File.ReadAllTextAsync(dest);
-            
-            var insert = html.Insert(html.IndexOf("</head>", StringComparison.Ordinal), css);
-            
-            await File.WriteAllTextAsync(dest,insert);
-
-            File.Delete(path);
-
+                var html = await File.ReadAllTextAsync(dest);
+                var insert = html.Insert(html.IndexOf("</head>", StringComparison.Ordinal), css);
+                await File.WriteAllTextAsync(dest,insert);
+                File.Delete(path);
+            }
+            else
+            {
+                var err = await process.GetError();
+                Console.WriteLine($"Error running Pandoc Proces {src}: {err}");
+            }
         }
 
-        private enum ReplacementType
+        public enum ReplacementType
         {
             Suffix,
             Prefix,
