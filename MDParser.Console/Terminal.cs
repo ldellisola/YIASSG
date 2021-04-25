@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommandLine;
+using MDParser.Utils;
 
 namespace MDParser.Console
 {
@@ -31,8 +32,8 @@ namespace MDParser.Console
 
         public static async Task RunOptionsAsync(Options opts)
         {
-            string dest = opts.Destination;
-            string src = opts.Source;
+            string dest = opts.Destination.FormatAsPath();
+            string src = opts.Source.FormatAsPath();
             
             Directory.Delete(dest,true);
             DirectoryStructure.Copy(new DirectoryInfo(src), new DirectoryInfo(dest),true);
@@ -46,17 +47,26 @@ namespace MDParser.Console
 
             DirectoryStructure.RunInEveryDirectory(t =>
             {
-                var metadataFiles = t.GetFiles( ".courseMetadata");
-                if(metadataFiles.Length != 1)
+                System.Console.WriteLine($"In Folder {t.FullName}");
+                
+                var metadataFiles = t.EnumerateFiles( "courseMetadata.stp",new EnumerationOptions{ ReturnSpecialDirectories = true, AttributesToSkip = FileAttributes.Directory });
+                
+                if(metadataFiles.Count() != 1)
+                { 
+                    System.Console.WriteLine("FILES");
+                    t.EnumerateFiles("*", new EnumerationOptions { ReturnSpecialDirectories = true, AttributesToSkip = FileAttributes.Directory }).ToList().ForEach(a=> System.Console.WriteLine($"\t {a.Name}"));
+                    System.Console.WriteLine("SYSTEM FILES");
+                    t.EnumerateFileSystemInfos("*", new EnumerationOptions { ReturnSpecialDirectories = true, AttributesToSkip = FileAttributes.Directory }).ToList().ForEach(a=> System.Console.WriteLine($"\t {a.Name}"));
+                    System.Console.WriteLine("No METADATA FOUND");
                     return;
-
+                }
                 Metadata metadata = JsonSerializer.Deserialize<Metadata>(metadataFiles.First().OpenText().ReadToEnd());
                 coursesMedatada.Add(metadata);
                 var mdFiles = t.GetFiles("*.md").ToList();
                 if (mdFiles.Count != 0)
                 {
                     string indexFile = DirectoryStructure.CreateIndex(mdFiles, metadata.CourseName);
-                    File.WriteAllText(t.FullName + @"/index.md",indexFile);
+                    File.WriteAllText((t.FullName + @"/index.md").FormatAsPath(),indexFile);
                 }
 
             },dest);

@@ -209,7 +209,7 @@ namespace MDParser
                 bld.AppendLine($"- [{t.CourseCode} - {t.CourseName}]({t.CourseCode}/index.md)");
             });
 
-            File.WriteAllText(dest + @"/index.md",bld.ToString());
+            File.WriteAllText((dest + @"/index.md").FormatAsPath(),bld.ToString());
         }
     }
 

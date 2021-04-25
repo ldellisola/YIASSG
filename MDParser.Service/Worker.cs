@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
+
+using MDParser.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -23,24 +23,21 @@ namespace MDParser.Service
         private readonly string email;
         private readonly string branch;
         private readonly int minuteInterval;
-        private readonly CredentialsHandler credentialsProvider;
+        private readonly Git git;
 
         public Worker(ILogger<Worker> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
-            projectDirectory = _config["ProjectDirectory"];
-            credentialsProvider = (url, usernameFromUrl, types) =>
-                new UsernamePasswordCredentials
-                {
-                    Username = _config["Credentials:PAT"],
-                    Password = string.Empty
-                };
+            projectDirectory = _config["ProjectDirectory"].FormatAsPath();
+            
             projectURL = _config["RepositoryURL"];
             name = _config["Credentials:Name"];
             email = _config["Credentials:Email"];
             branch = _config["branch"];
             minuteInterval = int.Parse(_config["pullInterval"]);
+
+            git = new Git(name, email, _config["Credentials:PAT"], projectDirectory, projectURL);
         }
 
 
@@ -54,42 +51,24 @@ namespace MDParser.Service
                 bool folderExists = Directory.Exists(projectDirectory);
 
 
-                if (!folderExists)
+                if (!folderExists || !Directory.Exists((projectDirectory + "/.git" ).FormatAsPath()))
                 {
                     _logger.LogInformation("Repository is not here. Clonning from github");
-                    var cloneOptions = new CloneOptions
-                    {
-                        CredentialsProvider = credentialsProvider
-                    };
-
-                    string path = Repository.Clone(projectURL, projectDirectory, cloneOptions);
+                    await git.Clone(stoppingToken);
+                    
                 }
 
                 try
                 {
-                    var repository = new Repository(projectDirectory);
+                    _logger.LogInformation($"Trying to pull files from repository");
 
-                    // Pull Latest update
-                    var pullOptions = new PullOptions
-                    {
-                        FetchOptions = new FetchOptions
-                        {
-                            CredentialsProvider = credentialsProvider
-                        }
-                    };
-
-                    var signature = new Signature(new Identity(name, email), DateTimeOffset.Now);
-                    var mergeResult = Commands.Pull(repository, signature, pullOptions);
+                    if (await git.Pull(stoppingToken)) { 
                     
-                    _logger.LogInformation($"Pulling files from repository. Current status: {mergeResult.Status.ToString()}");
-                    bool isDebug = false;
-//#if DEBUG
-//                    isDebug = true;
-//#endif
-                    if (mergeResult.Status != MergeStatus.UpToDate || !folderExists|| isDebug)
-                    {
+                        _logger.LogInformation("New files to pull found");
+
+
                         string src = projectDirectory;
-                        string dest = $"{projectDirectory}docs";
+                        string dest = $@"{projectDirectory}\docs".FormatAsPath();
                         var pandocDictionary = Pandoc.GetDictionary();
 
                         _logger.LogInformation($"Converting files from {src} to {dest}");
@@ -107,7 +86,7 @@ namespace MDParser.Service
 
                         DirectoryStructure.RunInEveryDirectory(t =>
                         {
-                            var metadataFiles = t.GetFiles( ".courseMetadata");
+                            var metadataFiles = t.GetFiles( "courseMetadata.stp");
                             if(metadataFiles.Length != 1)
                                 return;
 
@@ -117,7 +96,7 @@ namespace MDParser.Service
                             if (mdFiles.Count != 0)
                             {
                                 string indexFile = DirectoryStructure.CreateIndex(mdFiles, metadata.CourseName);
-                                File.WriteAllText(t.FullName + @"/index.md",indexFile);
+                                File.WriteAllText((t.FullName + @"/index.md").FormatAsPath(),indexFile);
                             }
 
                         },dest);
@@ -146,22 +125,25 @@ namespace MDParser.Service
 
                         // Add new Files
 
-                        Commands.Stage(repository, "*");
+                        await git.Add(stoppingToken);
 
 
                         // Commit changes
 
-                        var commit = repository.Commit("Automatically converted Markdown files", signature, signature);
+                        await git.Commit("Automatically converted Markdown files", stoppingToken);
 
                         _logger.LogInformation("Files Commited");
                         
                         // Push changes
 
-                        var pushOptions = new PushOptions {CredentialsProvider = credentialsProvider};
-                        repository.Network.Push(repository.Branches[branch], pushOptions);
+                        await git.Push(stoppingToken);
                         
                         _logger.LogInformation($"Files pushed to {branch}");
 
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No new updates");
                     }
 
                 }

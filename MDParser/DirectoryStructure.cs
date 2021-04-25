@@ -34,7 +34,7 @@ namespace MDParser
                 {
                     try
                     {
-                        File.Copy(t.FullName, dest.FullName + @"/" + t.Name, overwriteFiles);
+                        File.Copy(t.FullName, (dest.FullName + @"/" + t.Name).FormatAsPath(), overwriteFiles);
                     }
                     catch (Exception e)
                     {
