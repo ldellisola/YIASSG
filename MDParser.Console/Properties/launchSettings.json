@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "MDParser.Console": {
-      "commandName": "Project",
-      "commandLineArgs": "-s C:\\Users\\luckd\\Desktop\\test -d C:\\Users\\luckd\\Desktop\\test\\docs",
-      "remoteDebugEnabled": false
-    }
-  }
-}
