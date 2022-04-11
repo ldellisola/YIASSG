@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace YIASSG
         private readonly AppSettings _settings;
         private readonly string _destination;
         private readonly string _source;
-        private List<Metadata> _courses;
+        private IEnumerable<Metadata> _courses;
         private readonly Markdown _markdown;
 
         public YIASSG(string src, string dest, AppSettings settings)
@@ -27,11 +28,11 @@ namespace YIASSG
             this._markdown = new Markdown(settings);
         }
 
-        private List<Metadata> FindCoursesMetadata()
+        private IEnumerable<Metadata> FindCoursesMetadata()
         {
             return Directory.EnumerateFiles(_destination, "courseMetadata.stp", SearchOption.AllDirectories)
-                .ToList()
-                .ConvertAll(Metadata.LoadFromFile);
+                .Select(Metadata.LoadFromFile)
+                .OrderBy(t => t.Code);
         }
 
         private void CreateIndexForCourse(Metadata course)
@@ -40,18 +41,25 @@ namespace YIASSG
                 .ToList()
                 .ConvertAll(t => new FileInfo(t));
 
-            string indexFile = DirectoryStructure.CreateIndex(files, course.CourseName);
+            string indexFile = DirectoryStructure.CreateIndex(files, course.Name);
             File.WriteAllText((course.Path + @"/index.md").FormatAsPath(), indexFile);
         }
 
         private Task CreateIndexFileAsync(CancellationToken token = default)
         {
-            StringBuilder bld = new StringBuilder();
+            var doc = new MarkdownDocument();
 
-            bld.AppendLine($"# Materias");
-            _courses.ForEach(t => bld.AppendLine($"- [{t.CourseCode} - {t.CourseName}]({t.CourseCode}/index.md)"));
+            doc.AddHeading()
+                .AddLine("Materias");
 
-            return File.WriteAllTextAsync(($"{_destination}/index.md").FormatAsPath(), bld.ToString(), token);
+            foreach (var course in _courses)
+            {
+                doc.AddUnorderedListElement()
+                    .AddLink($"{course.Code} - {course.Name}", $"{course.Code}/index.md")
+                    .AddNewLine();
+            }
+
+            return File.WriteAllTextAsync($"{_destination}/index.md".FormatAsPath(), doc.Build(), token);
         }
 
         private string PrepareMarkdownDocument(string content, string filename)
@@ -85,10 +93,11 @@ namespace YIASSG
             DirectoryStructure.Copy(_source, _destination);
             
             _courses = FindCoursesMetadata();
-            _courses.ForEach(this.CreateIndexForCourse);
+            foreach(var course in _courses)
+                CreateIndexForCourse(course);
             
             await CreateIndexFileAsync(token);
-            DirectoryStructure.RunInAllFiles(ConvertDocument, _destination, token: token);
+            DirectoryStructure.RunInAllFiles(ConvertDocument, _destination);
         }
     }
 }

@@ -135,7 +135,7 @@ namespace YIASSG
 
                 // TODO: Some files are not working
                 try{
-                originalResource.MoveTo($"{file.Directory}/{newRelativeResourceName}".FormatAsPath(), true);
+                    originalResource.MoveTo($"{file.Directory}/{newRelativeResourceName}".FormatAsPath(), true);
                 }
                 catch (Exception e)
                 {

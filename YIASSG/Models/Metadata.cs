@@ -8,8 +8,11 @@ namespace YIASSG.Models
 {
     public class Metadata 
     {
-        public string CourseName { get; set; }
-        public string CourseCode { get; set; }
+        [JsonPropertyName("CourseName")]
+        public string Name { get; set; }
+        
+        [JsonPropertyName("CourseCode")]
+        public string Code { get; set; }
         
         [JsonIgnore]
         public string Path { get; set; }
@@ -19,7 +22,7 @@ namespace YIASSG.Models
         {
             var file = new FileInfo(filename);
             var course = JsonSerializer.Deserialize<Metadata>(file.OpenText().ReadToEnd()) ?? throw new Exception();
-            course.Path = file.DirectoryName;
+            course.Path = file.DirectoryName!;
             return course;
         }
         

@@ -11,11 +11,7 @@ public static class TreeNodeExtension
 {
     public static void WriteMarkDown(this TitleNode node, MarkdownDocument doc, int index)
     {
-        if (node.Level == 0)
-            doc.AddOrderedListElement(index, node.Level)
-                .AddLink(node.Text, node.FileName)
-                .AddNewLine();
-        else
+
             doc.AddUnorderedListElement(node.Level)
                 .AddLink(node.Text, node.FileName, node.RealLevel, node.Text)
                 .AddNewLine();

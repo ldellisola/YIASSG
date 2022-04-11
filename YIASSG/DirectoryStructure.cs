@@ -128,12 +128,12 @@ public static class DirectoryStructure
     }
 
     public static void RunInAllFiles(Action<string> func, string dir,
-        string searchPattern = "*.md", CancellationToken token = default)
+        string searchPattern = "*.md")
     {
         foreach (var file in Directory.GetFiles(dir, searchPattern)) func(file);
 
         Directory.GetDirectories(dir)
             .ToList()
-            .ForEach(item => RunInAllFiles(func, item, searchPattern, token));
+            .ForEach(item => RunInAllFiles(func, item, searchPattern));
     }
 }

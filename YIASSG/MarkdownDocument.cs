@@ -96,7 +96,7 @@ public class MarkdownDocument
 
         return this;
     }
-    
+
     public MarkdownDocument AddUnorderedListElement(int levelOfIndentation = 0)
     {
         AddIndentation(levelOfIndentation);
