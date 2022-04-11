@@ -8,47 +8,46 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using YIASSG.Exceptions;
 using YIASSG.Utils;
 
 namespace YIASSG;
 
 public static class DirectoryStructure
 {
-    private static string[] excludedExtensions = {".avi"};
-    private static string[] excludedFolders = {"docs"};
-
-    public static void Copy(DirectoryInfo src, DirectoryInfo dest, bool isRoot, bool overwriteFiles = true)
+    private static readonly EnumerationOptions Options = new()
     {
-        if (src.Exists)
+        ReturnSpecialDirectories = false,
+        AttributesToSkip = FileAttributes.Hidden,
+        RecurseSubdirectories = true
+    };
+
+    private static readonly string[] ForbiddenTypes = {".avi", ".mp4", ".mkv",".mpg",".mpeg", ".mov"};
+
+    public static void Copy(string src, string dest)
+    {
+        src = src.FormatAsPath();
+        dest = dest.FormatAsPath();
+        
+        if (!Directory.Exists(src))
+            throw new SourceNotFoundException(src);
+        
+        if (Directory.Exists(dest))
+            Directory.Delete(dest, true);
+
+        Directory.CreateDirectory(dest);
+        
+        //Now Create all of the directories
+        foreach (string dirPath in Directory.EnumerateDirectories(src, "*", Options)
+                                            .Where(t=> t != dest))
         {
-            if (!dest.Exists) dest.Create();
-
-            var srcLenght = src.FullName.Length;
-
-            var files = src.GetFiles().Where(t => !t.Attributes.HasFlag(FileAttributes.Hidden)).ToList();
-
-
-            files.ForEach((t) =>
-            {
-                try
-                {
-                    File.Copy(t.FullName, (dest.FullName + @"/" + t.Name).FormatAsPath(), overwriteFiles);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine("The File {0} couldn't be copied. Error MSG: {1}", t.FullName, e.Message);
-                }
-            });
-
-
-            var directories = src.GetDirectories()
-                .Where(t => !excludedFolders.Contains(t.Name) && !t.Attributes.HasFlag(FileAttributes.Hidden)).ToList();
-
-            directories.ForEach(t =>
-            {
-                var newDest = dest.CreateSubdirectory(t.Name);
-                Copy(t, newDest, false, overwriteFiles);
-            });
+            Directory.CreateDirectory(dirPath.Replace(src, dest));
+        }
+        //Copy all the files & Replaces any files with the same name
+        foreach (string newPath in Directory.EnumerateFiles(src, "*.*",Options)
+                     .Where(t=> !ForbiddenTypes.Any(t.EndsWith)))
+        {
+            File.Copy(newPath, newPath.Replace(src, dest), true);
         }
     }
 

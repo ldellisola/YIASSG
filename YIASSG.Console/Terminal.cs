@@ -32,10 +32,8 @@ public static class Terminal
     private static async Task RunOptionsAsync(Options opts)
     {
         var settings = JsonSerializer.Deserialize<AppSettings>(File.OpenText(opts.Settings.FormatAsPath()).ReadToEnd());
-
-        var md = new Markdown(settings);
         
-        await new MDParser(
+        await new YIASSG(
             opts.Source.FormatAsPath(),
             opts.Destination.FormatAsPath(),
             settings

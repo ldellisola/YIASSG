@@ -11,20 +11,19 @@ using YIASSG.Models;
 
 namespace YIASSG
 {
-    public class MDParser
+    public class YIASSG
     {
         private readonly AppSettings _settings;
         private readonly string _destination;
         private readonly string _source;
-        private readonly List<Metadata> _courses;
+        private List<Metadata> _courses;
         private readonly Markdown _markdown;
 
-        public MDParser(string src, string dest, AppSettings settings)
+        public YIASSG(string src, string dest, AppSettings settings)
         {
             this._source = src;
             this._destination = dest;
             this._settings = settings;
-            this._courses = FindCoursesMetadata();
             this._markdown = new Markdown(settings);
         }
 
@@ -83,10 +82,11 @@ namespace YIASSG
 
         public async Task Run(CancellationToken token = default)
         {
-            Directory.Delete(_destination, true);
-            DirectoryStructure.Copy(new DirectoryInfo(_source), new DirectoryInfo(_destination), true);
-
+            DirectoryStructure.Copy(_source, _destination);
+            
+            _courses = FindCoursesMetadata();
             _courses.ForEach(this.CreateIndexForCourse);
+            
             await CreateIndexFileAsync(token);
             DirectoryStructure.RunInAllFiles(ConvertDocument, _destination, token: token);
         }

@@ -13,6 +13,12 @@ public static class Paths
     private static readonly char WindowsPathSeparator = '\\';
     private static readonly char UnixPathSeparator = '/';
 
+    /// <summary>
+    /// It formats a string as a path in the current platform's format.
+    /// Windows uses '\' while Unix OS' uses '/'
+    /// </summary>
+    /// <param name="p"> string containing the path</param>
+    /// <returns>A properly formatted path for the current OS</returns>
     public static string FormatAsPath(this string p)
     {
         return Environment.OSVersion.Platform == PlatformID.Win32NT
@@ -20,6 +26,11 @@ public static class Paths
             : p.Replace(WindowsPathSeparator, UnixPathSeparator);
     }
 
+    /// <summary>
+    /// It creates a path in the current platform format
+    /// </summary>
+    /// <param name="vs"> strings to concatenate</param>
+    /// <returns>A formatted path</returns>
     public static string FormatAsPath(params string[] vs)
     {
         return System.IO.Path.Combine(vs);

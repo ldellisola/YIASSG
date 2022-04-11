@@ -64,7 +64,7 @@ public class Worker : BackgroundService
                     var src = _projectDirectory;
                     var dest = $@"{_projectDirectory}\docs".FormatAsPath();
 
-                    await new MDParser(src, dest, _appSettings).Run(token);
+                    await new YIASSG(src, dest, _appSettings).Run(token);
 
 
                     await _git.Add(token);
