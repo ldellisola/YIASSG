@@ -12,7 +12,7 @@
     "\\\\sub": "\\subset",
     "\\\\empty": "\\emptyset",
     "\\\\rarr": "\\rightarrow",
-    "\\\\Rarr":"\\Rightarrow",
+    "\\\\Rarr": "\\Rightarrow",
     "\\\\larr": "\\leftarrow",
     "\\\\Larr": "\\Leftarrow"
   },

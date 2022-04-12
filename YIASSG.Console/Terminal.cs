@@ -32,7 +32,7 @@ public static class Terminal
     private static async Task RunOptionsAsync(Options opts)
     {
         var settings = JsonSerializer.Deserialize<AppSettings>(File.OpenText(opts.Settings.FormatAsPath()).ReadToEnd());
-        
+
         await new YIASSG(
             opts.Source.FormatAsPath(),
             opts.Destination.FormatAsPath(),

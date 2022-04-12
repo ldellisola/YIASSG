@@ -2,7 +2,8 @@
 
 ## Algoritmos Foneticos
 
-Los algoritmos foneticos son algoritmo que buscan comparar palabras en base a como suenan en vez del texto que esta escrito. Dentro de estos se encuentran **soundex** y **metaphone**
+Los algoritmos foneticos son algoritmo que buscan comparar palabras en base a como suenan en vez del texto que esta
+escrito. Dentro de estos se encuentran **soundex** y **metaphone**
 
 ### Soundex
 
@@ -11,7 +12,8 @@ Los algoritmos foneticos son algoritmo que buscan comparar palabras en base a co
    hola
   ```
 
-Soundex funciona reemplazando letras por numeros y luego generando un codigo especial de 4 caracteres, que describe a una palabra. Luego se puede usar este codigo para verificar si dos string sdistintos son similares o no.
+Soundex funciona reemplazando letras por numeros y luego generando un codigo especial de 4 caracteres, que describe a
+una palabra. Luego se puede usar este codigo para verificar si dos string sdistintos son similares o no.
 
 Para implementar soundex hay que seguir los siguientes pasos:
 
@@ -20,7 +22,7 @@ Para implementar soundex hay que seguir los siguientes pasos:
 2. Para todas las letras salvo la primera, tengo que reemplazarlas segun la siguente tabla:
 
    |         Letras         | Sonido |
-      | :--------------------: | :----: |
+         | :--------------------: | :----: |
    |       B, F, P, V       |   1    |
    | C, G, J, K, Q, S, X, Z |   2    |
    |          D, T          |   3    |
@@ -28,11 +30,15 @@ Para implementar soundex hay que seguir los siguientes pasos:
    |          M, N          |   5    |
    |           R            |   6    |
 
-3. Si antes de aplicar el paso 1 habia dos o mas letras con el mismo sonido adyacentes, entonces solo me quedo con la primera aparicion.
+3. Si antes de aplicar el paso 1 habia dos o mas letras con el mismo sonido adyacentes, entonces solo me quedo con la
+   primera aparicion.
 
-4. Si hay dos sonidos iguales separados por *H* o *W*, entonces solo me quedo con la primera aparicion. Si hay dos sonidos iguales separados por una vocal, entonces me quedo con las dos instancias.
+4. Si hay dos sonidos iguales separados por *H* o *W*, entonces solo me quedo con la primera aparicion. Si hay dos
+   sonidos iguales separados por una vocal, entonces me quedo con las dos instancias.
 
-5. Si al finalizar todos los pasos el codigo te queda menor a 4 caracteres (primer letra y 3 sonidos), entonces completar con 0s al final del codigo. Si el codigo tiene mas de 4 caracteres, quedarse con la primer letra y los primeros 3 sonidos.
+5. Si al finalizar todos los pasos el codigo te queda menor a 4 caracteres (primer letra y 3 sonidos), entonces
+   completar con 0s al final del codigo. Si el codigo tiene mas de 4 caracteres, quedarse con la primer letra y los
+   primeros 3 sonidos.
 
 Este algoritmo produciria los siguentes resultados:
 
@@ -114,11 +120,17 @@ return str.substring(0, 4);
 
 ### Metaphone
 
-Metaphone es otro algoritmo fonetico, pero la diferencia en este caso es que no genera un codigo de 4 caracteres, sino que para cada string se genera una codificacion especial, y esta codificacion es la que va a ser utilizada para calcular la simialridad.
+Metaphone es otro algoritmo fonetico, pero la diferencia en este caso es que no genera un codigo de 4 caracteres, sino
+que para cada string se genera una codificacion especial, y esta codificacion es la que va a ser utilizada para calcular
+la simialridad.
 
-No se vio en clase este algoritmo por que tiene muchas reglas, por eso utilizamos una libreria de Java que lo calculaba. Pero para ver si dos strings eran similares, tuvimos que implementarlo nosotros.
+No se vio en clase este algoritmo por que tiene muchas reglas, por eso utilizamos una libreria de Java que lo calculaba.
+Pero para ver si dos strings eran similares, tuvimos que implementarlo nosotros.
 
-Esta implementacion en sencilla, simplemente tomas a la codificacion mas larga  y luego vas iterando sobre ambas, si tienen el mismo caracter en la misma posicion, aumentas un contador. Luego de iterar por el arrelgo de menor tama;o, se divide la cantidad de matches (contador) que se consiguieron por la longitud de la codificacion mas larga. Cuanto mas cercano a 1 sea el valor, mas similares son.
+Esta implementacion en sencilla, simplemente tomas a la codificacion mas larga y luego vas iterando sobre ambas, si
+tienen el mismo caracter en la misma posicion, aumentas un contador. Luego de iterar por el arrelgo de menor tama;o, se
+divide la cantidad de matches (contador) que se consiguieron por la longitud de la codificacion mas larga. Cuanto mas
+cercano a 1 sea el valor, mas similares son.
 
 Aca se muestra una implementacion en Java de esta comparacion:
 
@@ -148,7 +160,8 @@ Los siguentes algoritmos tambien permiten encontrar la similaridad entre strings
 
 ### QGram
 
-QGram consiste en partir a las palabras en tokens de longitud Q y luego ser cuantos de esos tokens estan presentes en cada palabra.
+QGram consiste en partir a las palabras en tokens de longitud Q y luego ser cuantos de esos tokens estan presentes en
+cada palabra.
 
 El algoritmo para crear estos tokens se puede ver en la siguente implementacion de java:
 
@@ -191,11 +204,9 @@ for(int i = 1-q; i < input.length(); i++) {
 return tokens;
 ```
 
-Para calcular la similaridad entre dos listas de tokens generados con el algoritmo anterior solo necesito contar la cantidad de tokens que se repiten en ambos y los que no, por lo que se calcula como:
-$$
-\frac{\#A\cap B}{\#A\cup B}
-$$
-Aca se puede ver una implementacion en java de este calculo:
+Para calcular la similaridad entre dos listas de tokens generados con el algoritmo anterior solo necesito contar la
+cantidad de tokens que se repiten en ambos y los que no, por lo que se calcula como:
+$$ \frac{\#A\cap B}{\#A\cup B} $$ Aca se puede ver una implementacion en java de este calculo:
 
 ```java
 Double a= (double) (TriGramA.size() + TrigramB.size() - GetNonIntesectors());
@@ -206,7 +217,8 @@ return Double.valueOf(a /b );
 
 ### Levenshtein Distance
 
-Este algoritmo sirve para calcular la distancia (diferencia) que existe entre dos palabras. Para calcular esto se debe construir una matriz donde en la fila superior este ubicado el primer string y en la primer columa el segundo string:
+Este algoritmo sirve para calcular la distancia (diferencia) que existe entre dos palabras. Para calcular esto se debe
+construir una matriz donde en la fila superior este ubicado el primer string y en la primer columa el segundo string:
 
 ```java
                                         *	     C  H  A  U 

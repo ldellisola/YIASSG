@@ -13,26 +13,29 @@ public class MarkdownDocument
 
     public MarkdownDocument(string document = "")
     {
-        this._document = new StringBuilder(document);
+        _document = new StringBuilder(document);
     }
 
-    public string Build() => _document.ToString();
+    public string Build()
+    {
+        return _document.ToString();
+    }
 
-    public override string ToString() => _document.ToString();
+    public override string ToString()
+    {
+        return _document.ToString();
+    }
 
     public MarkdownDocument AddIndentation(int levelOfIndentation = 1)
     {
-        _document.AppendJoin("", Enumerable.Repeat('\t',levelOfIndentation));
+        _document.AppendJoin("", Enumerable.Repeat('\t', levelOfIndentation));
         // _document.AppendLine();
         return this;
     }
 
     public MarkdownDocument AddNewLine(int linesCount = 1)
     {
-        foreach (var i in Enumerable.Range(0,linesCount))
-        {
-            _document.AppendLine();
-        }
+        foreach (var i in Enumerable.Range(0, linesCount)) _document.AppendLine();
 
         return this;
     }
@@ -46,11 +49,8 @@ public class MarkdownDocument
 
     public MarkdownDocument AddOrderedList(IEnumerable<string> list, int levelOfIndentation = 0)
     {
-        int order = 1;
-        foreach (var line in list)
-        {
-            AddOrderedListElement(order,levelOfIndentation);
-        }
+        var order = 1;
+        foreach (var line in list) AddOrderedListElement(order, levelOfIndentation);
 
         return this;
     }

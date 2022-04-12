@@ -1,9 +1,6 @@
-$$
-\text{hello world} \R
-
+$$ \text{hello world} \R
 
 $$
-
 
 $$
 

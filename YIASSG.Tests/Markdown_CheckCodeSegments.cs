@@ -8,7 +8,6 @@ using NUnit.Framework;
 
 namespace YIASSG.Tests;
 
-
 public class Markdown_CheckCodeSegments
 {
     private static Markdown md;
@@ -28,10 +27,10 @@ public class Markdown_CheckCodeSegments
     {
         // Arrange
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
-        
+
         // Act
         var ex = Catch.Exception(() => md.CheckCodeSegments(inputText, filename));
-        
+
         // Assert
         ex.Should().NotBeNull().And.BeOfType<InvalidCodeSegmentException>();
     }
@@ -41,13 +40,11 @@ public class Markdown_CheckCodeSegments
     {
         // Arrange
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
-        
+
         // Act
         var ex = Catch.Exception(() => md.CheckCodeSegments(inputText, filename));
-        
+
         // Assert
         ex.Should().BeNull();
     }
-    
-    
 }

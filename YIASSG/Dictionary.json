@@ -1,16 +1,16 @@
 {
-  "\\\\and":"\\land",
-  "\\\\or":"\\lor",
-  "\\\\exist":"\\exists",
+  "\\\\and": "\\land",
+  "\\\\or": "\\lor",
+  "\\\\exist": "\\exists",
   "\\\\N": "\\mathbb{N}",
   "\\\\Q": "\\mathbb{Q}",
-  "\\\\R":"\\mathbb{R}",
+  "\\\\R": "\\mathbb{R}",
   "\\\\Z": "\\mathbb{Z}",
   "\\\\C": "\\mathbb{C}",
   "\\\\sub": "\\subset",
-  "\\\\empty":"\\emptyset",
-  "\\\\rarr":"\\rightarrow",
+  "\\\\empty": "\\emptyset",
+  "\\\\rarr": "\\rightarrow",
   "\\\\Rarr": "\\Rightarrow",
   "\\\\larr": "\\leftarrow",
-  "\\\\Larr":"\\Leftarrow"
+  "\\\\Larr": "\\Leftarrow"
 }

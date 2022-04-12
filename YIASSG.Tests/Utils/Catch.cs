@@ -15,6 +15,5 @@ public static class Catch
         {
             return e;
         }
-        
     }
 }

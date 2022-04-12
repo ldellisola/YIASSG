@@ -1,16 +1,18 @@
-using System;
+using System.IO;
 using System.Linq;
 
 namespace YIASSG.Exceptions;
 
-public class InvalidCodeSegmentException : Exception
+internal class InvalidImageLinkException : FileNotFoundException
 {
-    public InvalidCodeSegmentException(string fileName, string document, int start, int end)
+    public InvalidImageLinkException(string fileName, string imageMissing, string document, int start, int end)
         : base(@$"
-There are broken code segments in {fileName}.
+There are some missing images on this file: {fileName}.
+File missing: {imageMissing}
 At line: {GetStartingLine(document, start)}
 Context: 
 {GetContext(document, start, end)}
+This may happen if you are linking to the same image file twice or more. The recommended way is to have duplicated the images on your storage
 ")
     {
     }

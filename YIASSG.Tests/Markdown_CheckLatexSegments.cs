@@ -14,7 +14,7 @@ public class Markdown_CheckLatexSegments
     [SetUp]
     public void SetUp()
     {
-        this._md = new Markdown(new AppSettings());
+        _md = new Markdown(new AppSettings());
     }
 
 
@@ -25,10 +25,10 @@ public class Markdown_CheckLatexSegments
     {
         // Arrange
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
-        
+
         // Act
         var ex = Catch.Exception(() => _md.CheckLatexSegments(inputText, filename));
-        
+
         // Assert
         ex.Should().NotBeNull().And.BeOfType<InvalidLatexSegmentException>();
     }
@@ -38,10 +38,10 @@ public class Markdown_CheckLatexSegments
     {
         // Arrange
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
-        
+
         // Act
         var ex = Catch.Exception(() => _md.CheckLatexSegments(inputText, filename));
-        
+
         // Assert
         ex.Should().BeNull();
     }

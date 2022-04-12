@@ -22,33 +22,29 @@ public static class DirectoryStructure
         RecurseSubdirectories = true
     };
 
-    private static readonly string[] ForbiddenTypes = {".avi", ".mp4", ".mkv",".mpg",".mpeg", ".mov"};
+    private static readonly string[] ForbiddenTypes = {".avi", ".mp4", ".mkv", ".mpg", ".mpeg", ".mov"};
 
     public static void Copy(string src, string dest)
     {
         src = src.FormatAsPath();
         dest = dest.FormatAsPath();
-        
+
         if (!Directory.Exists(src))
             throw new SourceNotFoundException(src);
-        
+
         if (Directory.Exists(dest))
             Directory.Delete(dest, true);
 
         Directory.CreateDirectory(dest);
-        
+
         //Now Create all of the directories
-        foreach (string dirPath in Directory.EnumerateDirectories(src, "*", Options)
-                                            .Where(t=> t != dest))
-        {
+        foreach (var dirPath in Directory.EnumerateDirectories(src, "*", Options)
+                     .Where(t => t != dest))
             Directory.CreateDirectory(dirPath.Replace(src, dest));
-        }
         //Copy all the files & Replaces any files with the same name
-        foreach (string newPath in Directory.EnumerateFiles(src, "*.*",Options)
-                     .Where(t=> !ForbiddenTypes.Any(t.EndsWith)))
-        {
+        foreach (var newPath in Directory.EnumerateFiles(src, "*.*", Options)
+                     .Where(t => !ForbiddenTypes.Any(t.EndsWith)))
             File.Copy(newPath, newPath.Replace(src, dest), true);
-        }
     }
 
     public static string CreateIndex(List<FileInfo> mdFiles, string title)
