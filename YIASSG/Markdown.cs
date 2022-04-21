@@ -17,14 +17,16 @@ public class Markdown
     private readonly Dictionary<string, string> _dic;
     private readonly MarkdownPipeline _mdPipeline;
     private readonly string _htmlTemplate;
-    private readonly string _cssStyle;
+    private readonly IEnumerable<string> _css;
+    private readonly IEnumerable<(string Id, string Content)> _js;
 
     public Markdown(AppSettings settings)
     {
         _dic = settings.Dictionary;
         _mdPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
         _htmlTemplate = File.ReadAllText(settings.Template);
-        _cssStyle = File.ReadAllText("style.css");
+        _js = settings.JsAssets.Select(t => (t.Replace(".js",""),File.ReadAllText(t)));
+        _css = settings.CssAssets.Select(t => File.ReadAllText(t));
     }
 
     /// <summary>
@@ -236,7 +238,8 @@ public class Markdown
     {
         return _htmlTemplate
             .Replace("{{title}}", title)
-            .Replace("{{style}}", _cssStyle)
+            .Replace("{{css}}", string.Join('\n', _css.Select(t=> $"<style>{t}</style>")))
+            .Replace("{{js}}", string.Join('\n', _js.Select(t=> $"<script id=\"{t.Id}-script\">{t.Content}</script>")))
             .Replace("{{body}}", Markdig.Markdown.ToHtml(document, _mdPipeline));
     }
 

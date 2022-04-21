@@ -16,5 +16,5 @@
     "\\\\larr": "\\leftarrow",
     "\\\\Larr": "\\Leftarrow"
   },
-  "Template": "template.html"
+  "Template": "HTMLResources/template.html"
 }
