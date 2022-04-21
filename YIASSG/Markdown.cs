@@ -228,7 +228,7 @@ public class Markdown
             }
 
 
-            return $"<img src=\"{newRelativeResourceName}\" alt=\"{alt}\" style=\"scale:0.{scale};\" />";
+            return $"<img src=\"{newRelativeResourceName}\" alt=\"{alt}\" style=\"zoom:{scale}%;\" />";
         });
 
         return document;
