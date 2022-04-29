@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace YIASSG.Utils;
@@ -41,8 +37,9 @@ public static class Paths
     /// </summary>
     /// <param name="p">path to the resource</param>
     /// <returns>It returns a pair of Directory and file</returns>
-    public static (string, string) SplitDirectoryFromFile(this string p)
+    public static (string directory, string? file) SplitDirectoryFromFile(this string p)
     {
+
         var path = Environment.OSVersion.Platform == PlatformID.Win32NT
             ? p.FormatAsPath().Split(WindowsPathSeparator)
             : p.FormatAsPath().Split(UnixPathSeparator);
@@ -50,12 +47,13 @@ public static class Paths
         var file = path.LastOrDefault();
 
         if (path.Length == 1)
-            return ("", file);
+            return (string.Empty, file);
 
         var directory = Environment.OSVersion.Platform == PlatformID.Win32NT
             ? string.Join(WindowsPathSeparator, path.Take(path.Length - 1))
             : string.Join(UnixPathSeparator, path.Take(path.Length - 1));
 
+        
         return (directory, file);
     }
 }

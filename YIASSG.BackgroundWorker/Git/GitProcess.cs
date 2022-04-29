@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,17 +7,17 @@ namespace YIASSG.BackgroundWorker.Git;
 
 public class GitProcess
 {
-    private readonly Process process;
-    protected StringBuilder errors = new();
-    protected StringBuilder output = new();
+    private readonly Process _process;
+    private readonly StringBuilder _errors = new();
+    private readonly StringBuilder _output = new();
 
-    public GitProcess(string directory, params string[] args)
+    public GitProcess(string? directory, params string?[] args)
     {
-        process = new Process();
-        process.StartInfo = new ProcessStartInfo
+        _process = new Process();
+        _process.StartInfo = new()
         {
             FileName = "git",
-            Arguments = args.Aggregate("", (resutl, t) => resutl += $" {t}"),
+            Arguments = string.Join(' ',args),
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -27,37 +26,37 @@ public class GitProcess
             WorkingDirectory = directory
         };
 
-        process.OutputDataReceived += (s, e) => { output.Append(e.Data); };
-        process.ErrorDataReceived += (s, e) => { errors.Append(e.Data); };
+        _process.OutputDataReceived += (_, e) => { _output.Append(e.Data); };
+        _process.ErrorDataReceived += (_, e) => { _errors.Append(e.Data); };
     }
 
     public async Task Execute(CancellationToken token = default)
     {
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        _process.Start();
+        _process.BeginOutputReadLine();
+        _process.BeginErrorReadLine();
 
-        await process.WaitForExitAsync(token);
+        await _process.WaitForExitAsync(token);
         //Console.WriteLine($"Exit code: {process.ExitCode}");
     }
 
     public bool HasError()
     {
-        return process.ExitCode != 0;
+        return _process.ExitCode != 0;
     }
 
     public string GetError()
     {
-        return errors.ToString();
+        return _errors.ToString();
     }
 
     public string GetOutput()
     {
-        return output.ToString();
+        return _output.ToString();
     }
 
     public void Dispose()
     {
-        process.Dispose();
+        _process.Dispose();
     }
 }

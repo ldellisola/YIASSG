@@ -10,7 +10,7 @@ public class Hooks
     private class Options
     {
         [Option('s', "source", Required = true, HelpText = "source of the markdown documents")]
-        public string Source { get; set; }
+        public string Source { get; set; } = null!;
     }
 
     public static async Task Main(string[] args)

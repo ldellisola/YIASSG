@@ -5,36 +5,28 @@
         <UserSecretsId>dotnet-MDParser.Service-D2EA2E2C-859F-462B-A338-68A62244ADA5</UserSecretsId>
         <LangVersion>10</LangVersion>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Remove="Dictionary.json"/>
+        <Content Remove="Dictionary.json" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="style.css"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="style.css">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="Dictionary.json">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <None Remove="style.css" />
+        <None Include="config.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\YIASSG\YIASSG.csproj"/>
+        <ProjectReference Include="..\YIASSG\YIASSG.csproj" />
     </ItemGroup>
 </Project>

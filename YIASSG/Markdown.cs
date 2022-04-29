@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using Markdig;
 using YIASSG.Utils;
@@ -22,6 +21,7 @@ public class Markdown
 
     public Markdown(AppSettings settings)
     {
+        ArgumentNullException.ThrowIfNull(settings.Dictionary);
         _dic = settings.Dictionary;
         _mdPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseBootstrap().Build();
         _htmlTemplate = File.ReadAllText(settings.Template);
@@ -36,7 +36,6 @@ public class Markdown
     /// <returns></returns>
     public string FixLatex(string document)
     {
-        // TODO: Hardcode key, replacement definitions
         foreach (var (key, replacement) in _dic)
             document = Regex.Replace(
                 document,
@@ -46,13 +45,13 @@ public class Markdown
 
         return document;
     }
-
+    
     private readonly Regex _linksPattern =
         new(
             @"\[(?<title>.+)\]\((?<address>.*)\.md(?<reference>#*)(?<fragment>.*)\)",
             RegexOptions.Compiled
         );
-
+    
     /// <summary>
     /// It transforms links directed to md files their HTML equivalent files
     /// </summary>
@@ -66,18 +65,12 @@ public class Markdown
             var (address, file) = match.Groups["address"].Value.SplitDirectoryFromFile();
 
             var completeAddress = string.IsNullOrWhiteSpace(address)
-                ? UrlEncoder.Default.Encode(file)
-                : $"{address}/{UrlEncoder.Default.Encode(file)}".FormatAsPath();
+                ? UrlEncoder.Default.Encode(file!)
+                : $"{address}/{UrlEncoder.Default.Encode(file!)}".FormatAsPath();
 
             var hashtag = match.Groups["reference"].Value;
-            var reg = new Regex(@"[^a-zA-Z0-9\u00C0-\u00FF -_]");
-
-            // TODO: Work on this. See if theres a way to autoscroll to any fragment
-            var fragment = reg.Replace(match.Groups["fragment"].Value, "")
-                .Replace(' ', '-')
-                .ToLowerInvariant();
-
-
+            var fragment = match.Groups["fragment"].Value.PrepareFragment();
+            
             return hashtag.Length == 0
                 ? $"[{title}]({completeAddress}.html)"
                 : $"[{title}]({completeAddress}.html#{fragment})";
@@ -104,7 +97,6 @@ public class Markdown
             throw new InvalidLatexSegmentException(filename, document, start, end);
         }
     }
-
     private readonly Regex _codeSegmentsPattern =
         new(
             "^(?<indentation>.*)`{3,}",
@@ -134,7 +126,7 @@ public class Markdown
 
     private readonly Regex _htmlImagePattern =
         new(
-            "<img\\s*src=\"(?<src>[^\"]+)\"\\s*alt=\"(?<alt>[^\"]+)\"\\s*style=\"zoom:(?<scale>\\d+)%;\"\\s*/>",
+            "<img\\s*src=\"(?<src>[^\"]+)\"\\s*alt=\"(?<alt>[^\"]+)\"\\s*style=\"zoom:\\s*(?<scale>\\d+)%;\"\\s*/>",
             RegexOptions.Compiled
         );
     
@@ -144,6 +136,7 @@ public class Markdown
         foreach (Match match in _markdownImagePattern.Matches(document))
         {
             var imageFile = Paths.FormatAsPath(directory, match.Groups["resource"].Value);
+            
             if (!File.Exists(imageFile))
                 throw new InvalidImageLinkException(
                     documentName,
@@ -167,8 +160,8 @@ public class Markdown
                 );
         }
     }
-
-    public string FixImageLinks(string document, string filename)
+    
+     public string FixImageLinks(string document, string filename)
     {
         var file = new FileInfo(filename);
 
@@ -186,7 +179,7 @@ public class Markdown
             try{
                 originalResource.MoveTo($"{file.Directory}/{newRelativeResourceName}".FormatAsPath(), true);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new InvalidImageLinkException(
                     filename, 
@@ -216,7 +209,7 @@ public class Markdown
                 
                 originalResource.MoveTo($"{file.Directory}/{newRelativeResourceName}".FormatAsPath(), true);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new InvalidImageLinkException(
                     filename, 
@@ -228,20 +221,19 @@ public class Markdown
             }
 
 
-            return $"<img src=\"{newRelativeResourceName}\" alt=\"{alt}\" style=\"zoom:{scale}%;\" />";
+            return $"<p><img src=\"{newRelativeResourceName}\" class=\"img-fluid\" alt=\"{alt}\" style=\"zoom:{scale}%;\" /></p>";
         });
 
         return document;
     }
 
-    public string ToHTML(string document, string title)
+
+    public string ToHtml(string document, string title)
     {
         return _htmlTemplate
             .Replace("{{title}}", title)
             .Replace("{{css}}", string.Join('\n', _css.Select(t=> $"<style>{t}</style>")))
             .Replace("{{js}}", string.Join('\n', _js.Select(t=> $"<script id=\"{t.Id}-script\">{t.Content}</script>")))
-            .Replace("{{body}}", Markdig.Markdown.ToHtml(document, _mdPipeline));
+            .Replace("{{body}}", Markdig.Markdown.ToHtml(document,_mdPipeline));
     }
-
-
 }

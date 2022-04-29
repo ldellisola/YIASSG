@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using FluentAssertions;
 using YIASSG.Exceptions;
@@ -10,12 +9,12 @@ namespace YIASSG.Tests;
 
 public class Markdown_CheckCodeSegments
 {
-    private static Markdown md;
+    private static Markdown? _md;
 
     [SetUp]
     public void Setup()
     {
-        md = new Markdown(new AppSettings());
+        _md = new Markdown(new AppSettings());
     }
 
     [TestCase("./Resources/CodeSegmentExamples/Invalid/simple.md")]
@@ -29,7 +28,7 @@ public class Markdown_CheckCodeSegments
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
 
         // Act
-        var ex = Catch.Exception(() => md.CheckCodeSegments(inputText, filename));
+        var ex = Catch.Exception(() => _md!.CheckCodeSegments(inputText, filename));
 
         // Assert
         ex.Should().NotBeNull().And.BeOfType<InvalidCodeSegmentException>();
@@ -42,7 +41,7 @@ public class Markdown_CheckCodeSegments
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
 
         // Act
-        var ex = Catch.Exception(() => md.CheckCodeSegments(inputText, filename));
+        var ex = Catch.Exception(() => _md!.CheckCodeSegments(inputText, filename));
 
         // Assert
         ex.Should().BeNull();

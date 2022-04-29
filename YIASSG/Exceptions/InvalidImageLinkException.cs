@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace YIASSG.Exceptions;
 
-internal class InvalidImageLinkException : FileNotFoundException
+public class InvalidImageLinkException : FileNotFoundException
 {
     public InvalidImageLinkException(string fileName, string imageMissing, string document, int start, int end)
         : base(@$"
@@ -16,6 +16,18 @@ This may happen if you are linking to the same image file twice or more. The rec
 ")
     {
     }
+    
+    
+    public InvalidImageLinkException (string filename, int line, int column, string context)
+        :base(@$"
+There are some missing images on this file: {filename}.
+At line: {line}
+At Column: {column}
+Context: 
+{context}
+This may happen if you are linking to the same image file twice or more. The recommended way is to have duplicated the images on your storage
+")
+    {}
 
     private static int GetStartingLine(string document, int start)
     {

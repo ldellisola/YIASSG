@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -31,7 +32,8 @@ public static class Terminal
 
     private static async Task RunOptionsAsync(Options opts)
     {
-        var settings = JsonSerializer.Deserialize<AppSettings>(File.OpenText(opts.Settings.FormatAsPath()).ReadToEnd());
+        var settings = JsonSerializer.Deserialize<AppSettings>(await File.OpenText(opts.Settings.FormatAsPath()).ReadToEndAsync());
+        ArgumentNullException.ThrowIfNull(settings);
 
         await new YIASSG(
             opts.Source.FormatAsPath(),
@@ -44,6 +46,5 @@ public static class Terminal
     {
         System.Console.WriteLine("Error processing inputs!");
         System.Console.WriteLine("Shutting down.");
-        return;
     }
 }

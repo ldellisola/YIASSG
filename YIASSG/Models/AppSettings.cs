@@ -7,9 +7,9 @@ public class AppSettings
     /// <summary>
     /// Path to the dictionary
     /// </summary>
-    public Dictionary<string, string> Dictionary { get; set; }
+    public Dictionary<string, string>? Dictionary { get; set; }
 
-    public string MetadataFileName { get; set; }
+    public string? MetadataFileName { get; set; }
     public string Template { get; set; } = "HTMLResources/template.html";
 
     public string[] JsAssets { get; set; } = {"HTMLResources/prism.js"};

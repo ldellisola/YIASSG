@@ -14,6 +14,9 @@ public class Program
     {
         return Host.CreateDefaultBuilder(args)
             .UseSystemd()
-            .ConfigureServices((hostContext, services) => { services.AddHostedService<Worker>(); });
+            .ConfigureServices((_, services) =>
+            {
+                services.AddHostedService<Worker>();
+            });
     }
 }

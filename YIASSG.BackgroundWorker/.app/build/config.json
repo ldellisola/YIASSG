@@ -1,0 +1,22 @@
+{
+  "MetadataFileName": "courseMetadata.stp",
+  "Dictionary": {
+    "\\\\and": "\\land",
+    "\\\\or": "\\lor",
+    "\\\\exist": "\\exists",
+    "\\\\N": "\\mathbb{N}",
+    "\\\\Q": "\\mathbb{Q}",
+    "\\\\R": "\\mathbb{R}",
+    "\\\\Z": "\\mathbb{Z}",
+    "\\\\C": "\\mathbb{C}",
+    "\\\\sub": "\\subset",
+    "\\\\empty": "\\emptyset",
+    "\\\\rarr": "\\rightarrow",
+    "\\\\Rarr": "\\Rightarrow",
+    "\\\\larr": "\\leftarrow",
+    "\\\\Larr": "\\Leftarrow"
+  },
+  "Template": "/config/HTMLResources/template.html",
+  "JsAssets": ["/config/HTML_Resources/prism.js"],
+  "CssAssets": ["/config/HTML_Resources/prism.css", "/config/HTML_Resources/markdownStyle.css"]
+}

@@ -9,7 +9,7 @@ namespace YIASSG.Tests;
 
 public class Markdown_CheckLatexSegments
 {
-    private Markdown _md;
+    private Markdown? _md;
 
     [SetUp]
     public void SetUp()
@@ -27,7 +27,7 @@ public class Markdown_CheckLatexSegments
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
 
         // Act
-        var ex = Catch.Exception(() => _md.CheckLatexSegments(inputText, filename));
+        var ex = Catch.Exception(() => _md!.CheckLatexSegments(inputText, filename));
 
         // Assert
         ex.Should().NotBeNull().And.BeOfType<InvalidLatexSegmentException>();
@@ -40,7 +40,7 @@ public class Markdown_CheckLatexSegments
         var inputText = new FileInfo(filename).OpenText().ReadToEnd();
 
         // Act
-        var ex = Catch.Exception(() => _md.CheckLatexSegments(inputText, filename));
+        var ex = Catch.Exception(() => _md!.CheckLatexSegments(inputText, filename));
 
         // Assert
         ex.Should().BeNull();

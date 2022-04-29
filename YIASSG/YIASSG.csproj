@@ -27,12 +27,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Dictionary.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Include="HTMLResources\markdownStyle.css">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

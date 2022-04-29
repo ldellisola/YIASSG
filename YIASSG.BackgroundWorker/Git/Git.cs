@@ -7,24 +7,26 @@ namespace YIASSG.BackgroundWorker.Git;
 
 public class Git
 {
-    private string Directory;
-    private string repository;
-    private string Email;
-    private string User;
+    private readonly string _directory;
+    public readonly string Repository;
+    private readonly string _email;
+    private readonly string _user;
 
-    public Git(string _user, string _email, string _password, string _directory, string _repositoryHandle)
+    public Git(string user, string email, string password, string? directory, string repositoryHandle)
     {
-        Directory = _directory;
-        repository =
-            $@"https://{_user}:{_password}@{_repositoryHandle.Replace("https://", "", StringComparison.InvariantCultureIgnoreCase)}";
-        Email = _email;
-        User = _user;
-        if (!System.IO.Directory.Exists(_directory)) System.IO.Directory.CreateDirectory(_directory);
+        ArgumentNullException.ThrowIfNull(directory);
+        
+        _directory = directory;
+        Repository =
+            $@"https://{user}:{password}@{repositoryHandle.Replace("https://", "", StringComparison.InvariantCultureIgnoreCase)}";
+        _email = email;
+        _user = user;
+        if (!System.IO.Directory.Exists(directory)) System.IO.Directory.CreateDirectory(directory);
 
-        if (System.IO.Directory.Exists(_directory + "/.git"))
+        if (System.IO.Directory.Exists(directory + "/.git"))
         {
-            ConfigEmail(_email).Wait();
-            ConfigName(_user).Wait();
+            ConfigEmail(email).Wait();
+            ConfigName(user).Wait();
         }
     }
 
@@ -36,7 +38,7 @@ public class Git
 
     public async Task<bool> Clone(CancellationToken token = default)
     {
-        var p = new GitProcess(Directory, "clone", $"\"{repository}\"", Directory);
+        var p = new GitProcess(_directory, "clone", $"\"{Repository}\"", _directory);
 
         await p.Execute(token);
 
@@ -50,12 +52,12 @@ public class Git
 
         if (files.Length == 0)
         {
-            p = new GitProcess(Directory, "add", "--all");
+            p = new GitProcess(_directory, "add", "--all");
         }
         else
         {
             var args = files.Prepend("add").ToArray();
-            p = new GitProcess(Directory, args);
+            p = new GitProcess(_directory, args);
         }
 
         await p.Execute(token);
@@ -67,17 +69,17 @@ public class Git
     public async Task<bool> Commit(string message, CancellationToken token = default, params string[] files)
     {
         GitProcess p;
-        await ConfigEmail(Email, token);
-        await ConfigName(User, token);
+        await ConfigEmail(_email, token);
+        await ConfigName(_user, token);
 
         if (files.Length == 0)
         {
-            p = new GitProcess(Directory, "commit", "-am", $"\"{message}\"");
+            p = new GitProcess(_directory, "commit", "-am", $"\"{message}\"");
         }
         else
         {
             var args = files.Prepend("commit").Append("-m").Append($"\"{message}\"").ToArray();
-            p = new GitProcess(Directory, args);
+            p = new GitProcess(_directory, args);
         }
 
         await p.Execute(token);
@@ -90,7 +92,7 @@ public class Git
     /// <returns>True if there were not errors and something was pulled</returns>
     public async Task<bool> Pull(CancellationToken token = default)
     {
-        var p = new GitProcess(Directory, "pull");
+        var p = new GitProcess(_directory, "pull");
 
         await p.Execute(token);
 
@@ -101,23 +103,23 @@ public class Git
 
     public async Task<bool> Push(CancellationToken token = default)
     {
-        var p = new GitProcess(Directory, "push", $"\"{repository}\"");
+        var p = new GitProcess(_directory, "push", $"\"{Repository}\"");
 
         await p.Execute(token);
         return !HasError(p);
     }
 
-    public async Task<bool> ConfigName(string _name, CancellationToken token = default)
+    public async Task<bool> ConfigName(string name, CancellationToken token = default)
     {
-        var p = new GitProcess(Directory, "config", "user.name", $"\"{_name}\"");
+        var p = new GitProcess(_directory, "config", "user.name", $"\"{name}\"");
 
         await p.Execute(token);
         return !HasError(p);
     }
 
-    public async Task<bool> ConfigEmail(string _email, CancellationToken token = default)
+    public async Task<bool> ConfigEmail(string email, CancellationToken token = default)
     {
-        var p = new GitProcess(Directory, "config", "user.email", $"\"{_email}\"");
+        var p = new GitProcess(_directory, "config", "user.email", $"\"{email}\"");
 
         await p.Execute(token);
         return !HasError(p);

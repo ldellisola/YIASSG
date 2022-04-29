@@ -1,15 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Markdig.Parsers;
-using Markdig.Syntax;
+
 
 namespace YIASSG;
 
 public class MarkdownDocument
 {
-    private StringBuilder _document;
+    private readonly StringBuilder _document;
 
     public MarkdownDocument(string document = "")
     {
@@ -35,7 +33,7 @@ public class MarkdownDocument
 
     public MarkdownDocument AddNewLine(int linesCount = 1)
     {
-        foreach (var i in Enumerable.Range(0, linesCount)) _document.AppendLine();
+        foreach (var _ in Enumerable.Range(0, linesCount)) _document.AppendLine();
 
         return this;
     }
@@ -50,7 +48,7 @@ public class MarkdownDocument
     public MarkdownDocument AddOrderedList(IEnumerable<string> list, int levelOfIndentation = 0)
     {
         var order = 1;
-        foreach (var line in list) AddOrderedListElement(order, levelOfIndentation);
+        foreach (var _ in list) AddOrderedListElement(order, levelOfIndentation);
 
         return this;
     }
@@ -100,7 +98,7 @@ public class MarkdownDocument
     public MarkdownDocument AddUnorderedListElement(int levelOfIndentation = 0)
     {
         AddIndentation(levelOfIndentation);
-        _document.Append($"- ");
+        _document.Append("- ");
 
         return this;
     }
