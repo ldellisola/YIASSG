@@ -174,7 +174,7 @@ public class Markdown
             var originalResource = new FileInfo($"{file.Directory}/{originalRelativeResourceName}".FormatAsPath());
 
             var newRelativeResourceName =
-                $"{originalRelativeDirectory}/{Guid.NewGuid()}{originalResource.Extension}".FormatAsPath();
+                $"{originalRelativeDirectory}/{originalRelativeResourceName.GenerateShortHash()}{originalResource.Extension}".FormatAsPath();
             
             try{
                 originalResource.MoveTo($"{file.Directory}/{newRelativeResourceName}".FormatAsPath(), true);
@@ -196,7 +196,7 @@ public class Markdown
         document = _htmlImagePattern.Replace(document, (match) =>
         {
             var src = match.Groups["src"].Value;
-            var alt = Guid.NewGuid();
+            var alt = src.GenerateShortHash();
             var scale = match.Groups["scale"].Value;
 
             var (originalRelativeDirectory, _) = src.SplitDirectoryFromFile();

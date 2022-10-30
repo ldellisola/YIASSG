@@ -1,5 +1,7 @@
+using System;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -52,4 +54,17 @@ public static class StringExtensions
          .RemoveConsecutiveDuplicatedCharacter('-','.','_')
          .TrimEnd('-','.','_')
          .ToLowerInvariant();
+
+
+    public static string GenerateShortHash(this string str)
+    {
+        using var sha = SHA1.Create();
+        var textBytes = Encoding.UTF8.GetBytes(str);
+        var hashBytes = sha.ComputeHash(textBytes);
+        
+        return BitConverter
+            .ToString(hashBytes)
+            .Replace("-", string.Empty)
+            [..16];
+    }
 }

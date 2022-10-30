@@ -47,6 +47,11 @@ public class YIASSG
         foreach (var filename in Directory.EnumerateFiles(course.Path, "*.md").OrderBy(t => t))
         {
             var text = File.ReadAllText(filename);
+
+            text = Regex.Replace(text, "```[^`]+```", "", RegexOptions.Multiline);
+            text = Regex.Replace(text, @"\$\$((?!\$\$).)+\$\$", "", RegexOptions.Singleline);
+            
+            
             var headings = Regex.Matches(text, @"^(?<depth>\#+) (?<title>.+)", RegexOptions.Multiline)
                 .AsEnumerable()
                 .OrderBy(t => t.Index);
@@ -61,7 +66,7 @@ public class YIASSG
                 doc.AddUnorderedListElement(nLev)
                     .AddLink(
                         content,
-                        filename.Replace(course.Path + Path.DirectorySeparatorChar, ""),
+                        filename.Replace(course.Path, "").TrimStart(Path.DirectorySeparatorChar),
                         level,
                         content
                     )
@@ -109,7 +114,7 @@ public class YIASSG
         var content = _markdown.ToHtml(document, title!);
 
         File.WriteAllText(filename.Replace(".md", ".html"), content, Encoding.UTF8);
-        // File.Delete(filename);
+        File.Delete(filename);
     }
 
     public async Task Run(CancellationToken token = default)

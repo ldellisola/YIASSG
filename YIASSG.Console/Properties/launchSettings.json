@@ -2,7 +2,7 @@
   "profiles": {
     "YIASSG.Console": {
       "commandName": "Project",
-      "commandLineArgs": "-s /Users/ldellisola/dev/ITBANotebook -d /Users/ldellisola/Desktop/test/docs -c config.json",
+      "commandLineArgs": "-s /Users/ldellisola/dev/ITBANotebook -d /Users/ldellisola/dev/ITBANotebook/docs -c config.json",
       "remoteDebugEnabled": false
     }
   }
