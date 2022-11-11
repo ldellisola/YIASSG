@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <StartupObject></StartupObject>
         <LangVersion>10</LangVersion>
         <Nullable>enable</Nullable>
