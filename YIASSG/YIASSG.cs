@@ -66,7 +66,7 @@ public class YIASSG
                 doc.AddUnorderedListElement(nLev)
                     .AddLink(
                         content,
-                        filename.Replace(course.Path, "").TrimStart(Path.DirectorySeparatorChar),
+                        "./" + filename.Replace(course.Path, "").TrimStart(Path.DirectorySeparatorChar),
                         level,
                         content
                     )
@@ -87,7 +87,7 @@ public class YIASSG
 
         foreach (var course in _courses!)
             doc.AddUnorderedListElement()
-                .AddLink($"{course.Code} - {course.Name}", $"{course.Code}/index.md")
+                .AddLink($"{course.Code} - {course.Name}", $"./{course.Code}/index.md")
                 .AddNewLine();
 
         return File.WriteAllTextAsync($"{_destination}/index.md".FormatAsPath(), doc.Build(), token);

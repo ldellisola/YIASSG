@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>MDParser.Hooks</RootNamespace>
         <OutputType>Exe</OutputType>
+        <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

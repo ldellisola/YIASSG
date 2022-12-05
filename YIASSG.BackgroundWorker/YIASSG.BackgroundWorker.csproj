@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <UserSecretsId>dotnet-MDParser.Service-D2EA2E2C-859F-462B-A338-68A62244ADA5</UserSecretsId>
-        <LangVersion>10</LangVersion>
+        <LangVersion>latestmajor</LangVersion>
         <Nullable>enable</Nullable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
