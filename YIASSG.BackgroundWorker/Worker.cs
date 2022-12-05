@@ -22,23 +22,35 @@ public class Worker : BackgroundService
 
     public Worker(ILogger<Worker> logger, IConfiguration config)
     {
-        var env = Environment.GetEnvironmentVariables() 
-                                          ?? throw new Exception("Cannot access environment variables");
-        
+        var env = Environment.GetEnvironmentVariables()
+                  ?? throw new Exception("Cannot access environment variables");
+
         _logger = logger;
 
-        _projectDirectory = env["PROJECT_DIRECTORY"] is null 
-            ? config["ProjectDirectory"].FormatAsPath() 
-            : env["PROJECT_DIRECTORY"]!.ToString()!.FormatAsPath();
-        
-        _minuteInterval = int.Parse(env["PULL_INTERVAL"]?.ToString() ?? config["pullInterval"]);
-        _appSettings = JsonSerializer.Deserialize<AppSettings>(File.OpenRead(config["appSettings"]))
+        _projectDirectory = (
+            env["PROJECT_DIRECTORY"]?.ToString()
+            ?? config["ProjectDirectory"]
+            ?? throw new ArgumentException("PROJECT_DIRECTORY")
+        ).FormatAsPath();
+
+        _minuteInterval = int.Parse(
+            env["PULL_INTERVAL"]?.ToString()
+            ?? config["pullInterval"]
+            ?? throw new ArgumentException("PULL_INTERVAL")
+        );
+
+        _appSettings = JsonSerializer.Deserialize<AppSettings>(
+                           File.OpenRead(
+                               config["appSettings"]
+                               ?? throw new ArgumentException("appSettings")
+                           )
+                       )
                        ??
                        throw new ArgumentException("Invalid appSettings")
             ;
 
         _git = new Git.Git(
-            env["GITHUB_NAME"]?.ToString() ?? config["Github:Name"],
+            env["GITHUB_NAME"]?.ToString() ?? config["Github:Name"] ?? throw new ArgumentException("GITHUB_NAME"),
             env["GITHUB_EMAIL"]?.ToString() ?? throw new Exception("Invalid GITHUB_EMAIL variable"),
             env["GITHUB_PAT"]?.ToString() ?? throw new Exception("Invalid GITHUB_PAT variable"),
             _projectDirectory,

@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace YIASSG.Tests;
 
-public class Markdown_CheckLatexSegments
+public class MarkdownCheckLatexSegments
 {
     private Markdown? _md;
 

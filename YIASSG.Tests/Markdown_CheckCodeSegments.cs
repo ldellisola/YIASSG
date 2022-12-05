@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace YIASSG.Tests;
 
-public class Markdown_CheckCodeSegments
+public class MarkdownCheckCodeSegments
 {
     private static Markdown? _md;
 

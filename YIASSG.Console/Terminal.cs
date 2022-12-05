@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using YIASSG.Models;
 using YIASSG.Utils;
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
 namespace YIASSG.Console;
 
@@ -17,17 +18,16 @@ public static class Terminal
             .WithNotParsed(ParseError)
             .WithParsedAsync(RunOptionsAsync);
     }
-
-    private class Options
+    private sealed record Options
     {
-        [Option('s', "source", Required = true, HelpText = "source of the markdown documents")]
-        public string Source { get; set; }
-
+        [property:Option('s', "source", Required = true, HelpText = "source of the markdown documents")]
+        public required string Source { get; init; }
+    
         [Option('d', "destination", Required = true, HelpText = "Folder to publish the converted documents")]
-        public string Destination { get; set; }
-
+        public required string Destination { get; init; }
+    
         [Option('c', "config", Required = true, HelpText = "Path to the config file")]
-        public string Settings { get; set; }
+        public required string Settings { get; init; }
     }
 
     private static async Task RunOptionsAsync(Options opts)
